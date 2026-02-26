@@ -477,7 +477,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: var(--bg);
+  background: #f5f5f5;
   display: none;
   flex-direction: column;
 }
@@ -487,23 +487,23 @@ body {
 }
 
 .map-header {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
-  backdrop-filter: blur(20px);
+  background: #ffffff;
   padding: calc(var(--safe-top) + 8px) 16px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--card-border);
+  border-bottom: 1px solid #e0e0e0;
   z-index: 201;
 }
 
 .map-header h3 {
   font-size: 18px;
   font-weight: 700;
+  color: #1a1a2e;
 }
 
 .map-close {
-  background: rgba(255, 255, 255, 0.08);
+  background: #f0f0f0;
   border: none;
   width: 36px;
   height: 36px;
@@ -513,12 +513,12 @@ body {
   justify-content: center;
   font-size: 18px;
   cursor: pointer;
-  color: var(--text);
+  color: #333;
   transition: all 0.3s ease;
 }
 
 .map-close:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: #e0e0e0;
 }
 
 #map-container {
@@ -531,8 +531,8 @@ body {
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 12px;
-  background: rgba(79, 142, 247, 0.2);
-  color: var(--blue);
+  background: #e8f0fe;
+  color: #1a73e8;
 }
 
 /* MAP DATE FILTER BAR */
@@ -540,8 +540,8 @@ body {
   display: flex;
   gap: 6px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid var(--card-border);
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
   z-index: 202;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -549,9 +549,9 @@ body {
 .map-filter-pill {
   padding: 6px 16px;
   border-radius: 20px;
-  border: 1px solid var(--card-border);
-  background: transparent;
-  color: var(--text2);
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #666;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -560,8 +560,8 @@ body {
   transition: all 0.3s ease;
 }
 .map-filter-pill.active {
-  background: linear-gradient(135deg, #4F8EF7, #6C63FF);
-  border-color: transparent;
+  background: #1a73e8;
+  border-color: #1a73e8;
   color: white;
 }
 
@@ -570,21 +570,22 @@ body {
   display: flex;
   gap: 14px;
   padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   position: absolute;
   bottom: 180px;
   left: 12px;
   border-radius: 12px;
   z-index: 203;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .map-legend-item {
   display: flex;
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  color: rgba(255,255,255,0.8);
+  color: #555;
   font-weight: 500;
 }
 .map-legend-dot {
@@ -600,13 +601,14 @@ body {
   left: 0;
   right: 0;
   max-height: 55vh;
-  background: rgba(10, 10, 26, 0.92);
-  backdrop-filter: blur(30px);
-  border-top: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid #e0e0e0;
   border-radius: 20px 20px 0 0;
   z-index: 204;
   overflow-y: auto;
   transition: max-height 0.3s ease;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
 }
 .map-trips-panel.collapsed {
   max-height: 70px;
@@ -622,30 +624,31 @@ body {
   width: 40px;
   height: 4px;
   border-radius: 2px;
-  background: rgba(255,255,255,0.25);
+  background: #ccc;
 }
 .map-trips-summary {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   padding: 0 16px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid #eee;
 }
 .map-sum-card {
   flex: 1;
   text-align: center;
   padding: 10px 6px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: #f8f9fa;
+  border: 1px solid #eee;
 }
 .map-sum-card .val {
   font-size: 20px;
   font-weight: 700;
   line-height: 1;
+  color: #1a1a2e;
 }
 .map-sum-card .lbl {
   font-size: 10px;
-  color: var(--text2);
+  color: #888;
   margin-top: 3px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -660,40 +663,40 @@ body {
   padding: 12px;
   margin-bottom: 6px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.05);
+  background: #fff;
+  border: 1px solid #eee;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .map-trip-item:active {
   transform: scale(0.98);
-  background: rgba(255,255,255,0.08);
+  background: #f5f5f5;
 }
 .map-trip-item.selected {
-  border-color: var(--blue);
-  background: rgba(79, 142, 247, 0.1);
+  border-color: #1a73e8;
+  background: #e8f0fe;
 }
 .map-trip-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 8px currentColor;
 }
-.map-trip-dot.business { background: #00D4AA; color: #00D4AA; }
-.map-trip-dot.personal { background: #FF6B9D; color: #FF6B9D; }
-.map-trip-dot.unclassified { background: #FFB74D; color: #FFB74D; }
+.map-trip-dot.business { background: #00D4AA; box-shadow: 0 0 6px rgba(0,212,170,0.4); }
+.map-trip-dot.personal { background: #FF6B9D; box-shadow: 0 0 6px rgba(255,107,157,0.4); }
+.map-trip-dot.unclassified { background: #FFB74D; box-shadow: 0 0 6px rgba(255,183,77,0.4); }
 .map-trip-info { flex: 1; min-width: 0; }
 .map-trip-info .route {
   font-size: 13px;
   font-weight: 600;
+  color: #1a1a2e;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .map-trip-info .meta {
   font-size: 11px;
-  color: var(--text2);
+  color: #888;
   margin-top: 2px;
 }
 .map-trip-miles {
@@ -703,15 +706,16 @@ body {
 .map-trip-miles .mi {
   font-size: 16px;
   font-weight: 700;
+  color: #1a1a2e;
 }
 .map-trip-miles .unit {
   font-size: 10px;
-  color: var(--text3);
+  color: #aaa;
 }
 .map-no-trips {
   text-align: center;
   padding: 20px;
-  color: var(--text3);
+  color: #999;
   font-size: 14px;
 }
 
@@ -2570,8 +2574,11 @@ function openMap() {
   document.getElementById('map-overlay').classList.add('show');
   setTimeout(()=>{
     if (!leafletMap) {
-      leafletMap = L.map('map-container', { zoomControl: false }).setView([37.7749,-122.4194],13);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+      // Default to user's last known position, or a generic center
+      const defaultLat = lastMonitorPos ? lastMonitorPos.lat : 49.8951;
+      const defaultLng = lastMonitorPos ? lastMonitorPos.lng : -97.1384;
+      leafletMap = L.map('map-container', { zoomControl: false }).setView([defaultLat, defaultLng], 13);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
         attribution:'&copy; OpenStreetMap &copy; CartoDB', maxZoom:19
       }).addTo(leafletMap);
       L.control.zoom({ position: 'topright' }).addTo(leafletMap);
@@ -2696,7 +2703,7 @@ function renderMapTrips() {
     if (t.startCoord && t.endCoord) {
       const line = L.polyline(
         [[t.startCoord.lat, t.startCoord.lng], [t.endCoord.lat, t.endCoord.lng]],
-        { color: color, weight: 3, opacity: 0.6, dashArray: '8, 6' }
+        { color: color, weight: 4, opacity: 0.8, dashArray: '8, 5' }
       ).addTo(leafletMap);
       line.bindPopup(`${esc(t.startName||'Start')} &rarr; ${esc(t.endName||'Dest')}<br><b>${t.miles.toFixed(1)} mi</b> (${t.category})`);
       mapTripLines.push(line);
@@ -3346,65 +3353,11 @@ function clearAllData(){if(!confirm('Delete ALL data?'))return;app.trips=[];app.
 
 // ===================== DEMO DATA =====================
 function addDemoData(){
-  // If old demo data exists without coordinates, clear it to reload with coordinates
-  if(app.trips.length>0 && app.trips.every(t=>!t.startCoord && !t.endCoord)){
+  // No demo data — app starts clean, only real GPS trips will show
+  // Clear any old demo data from previous versions
+  if(app.trips.length>0 && app.trips.some(t=>t.startName && t.startName.includes('Oak St'))){
     app.trips=[];app.notifications=[];app.savedAddresses={};save();
   }
-  if(app.trips.length>0)return;
-  const routes=[
-    {s:'Home, 123 Oak St',e:'Downtown Office, 500 Market St',m:12.2,c:'business',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7905,lng:-122.3988}},
-    {s:'Office, 500 Market St',e:'Acme Corp, 200 Pine Ave',m:8.5,c:'business',
-     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7922,lng:-122.4010}},
-    {s:'Home, 123 Oak St',e:'Safeway, 300 Elm Rd',m:2.5,c:'personal',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7648,lng:-122.4525}},
-    {s:'Office, 500 Market St',e:'SFO Airport Terminal 2',m:18.7,c:'business',
-     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.6213,lng:-122.3790}},
-    {s:'Home, 123 Oak St',e:'24 Hour Fitness, 150 Gym Ln',m:3.2,c:'personal',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7752,lng:-122.4375}},
-    {s:'Client Site, 750 Tech Blvd',e:'Office, 500 Market St',m:15.1,c:'business',
-     sc:{lat:37.3861,lng:-122.0839},ec:{lat:37.7905,lng:-122.3988}},
-    {s:'Home, 123 Oak St',e:'Olive Garden, 400 Dine Way',m:4.8,c:'personal',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7580,lng:-122.4140}},
-    {s:'Office, 500 Market St',e:'Warehouse, 900 Industrial Dr',m:22.3,c:'business',
-     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7350,lng:-122.3820}},
-    {s:'Home, 123 Oak St',e:'Westfield Mall, 250 Shop St',m:6.1,c:'personal',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7844,lng:-122.4068}},
-    {s:'Office, 500 Market St',e:'Beta Inc, 600 Innovation Way',m:11.4,c:'business',
-     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7560,lng:-122.4480}},
-    {s:'Home, 123 Oak St',e:'Dr. Smith DDS, 180 Health Blvd',m:5.6,c:'personal',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7530,lng:-122.4185}},
-    {s:'Office, 500 Market St',e:'Convention Center, 800 Expo Dr',m:9.8,c:'business',
-     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.7840,lng:-122.4005}},
-    {s:'Home, 123 Oak St',e:'Golden Gate Park',m:1.9,c:'personal',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7694,lng:-122.4862}},
-    {s:'Client HQ, 350 Summit Ave',e:'Office, 500 Market St',m:14.2,c:'business',
-     sc:{lat:37.8044,lng:-122.2712},ec:{lat:37.7905,lng:-122.3988}},
-    {s:'Home, 123 Oak St',e:'Coffee Shop, 50 Bean St',m:2.1,c:'unclassified',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7720,lng:-122.4390}},
-    {s:'Home, 123 Oak St',e:'Grocery Store',m:7.5,c:'unclassified',
-     sc:{lat:37.7694,lng:-122.4462},ec:{lat:37.7810,lng:-122.4120}},
-    {s:'Office, 500 Market St',e:'Gamma LLC, 420 Corp Dr',m:16.8,c:'business',
-     sc:{lat:37.7905,lng:-122.3988},ec:{lat:37.8100,lng:-122.4150}},
-  ];
-  // Save some addresses
-  app.savedAddresses[normalizeAddr('Home, 123 Oak St')]={name:'Home, 123 Oak St',category:'personal',count:5};
-  app.savedAddresses[normalizeAddr('Office, 500 Market St')]={name:'Office, 500 Market St',category:'business',count:8};
-  app.savedAddresses[normalizeAddr('Downtown Office, 500 Market St')]={name:'Downtown Office, 500 Market St',category:'business',count:3};
-
-  const now=new Date();
-  routes.forEach((r,i)=>{
-    const d=new Date(now);d.setDate(d.getDate()-Math.floor(i*1.1));
-    d.setHours(8+Math.floor(Math.random()*10),Math.floor(Math.random()*60));
-    const dur=Math.round(r.m*2.5*60000);
-    app.trips.push({
-      id:(Date.now()-i*100000).toString(),category:r.c,miles:r.m,date:d.toISOString(),
-      duration:dur,startTime:d.toISOString(),endTime:new Date(d.getTime()+dur).toISOString(),
-      startName:r.s,endName:r.e,name:'',notes:'',
-      startCoord:r.sc||null,endCoord:r.ec||null
-    });
-  });
-  save();
 }
 
 // ===================== ALWAYS-ON GPS MONITOR =====================
@@ -3515,6 +3468,20 @@ function stopTracking(){
     startCoord:startPt?{lat:startPt.lat,lng:startPt.lng}:null,
     endCoord:endPt?{lat:endPt.lat,lng:endPt.lng}:null
   };
+
+  // Skip very short trips (GPS noise)
+  if(saveMiles < 0.1) {
+    debugLog('Trip too short ('+saveMiles+' mi), discarding');
+    document.getElementById('live-panel').classList.remove('show');
+    document.getElementById('idle-speed-wrap').style.display='';
+    document.getElementById('idle-accuracy').style.display='';
+    updateDriveUI('monitoring');
+    setGPS('monitoring');stopCounter=0;speedHistory=[];
+    return;
+  }
+
+  // Close map if open before showing summary
+  closeMap();
 
   // Reverse geocode both endpoints
   let resolved = 0;
