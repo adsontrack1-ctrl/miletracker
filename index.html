@@ -1667,13 +1667,35 @@ function autoClassifyTrip(trip){return getAddrCategory(trip.endName)||getAddrCat
 
 // ===================== DISTANCE & GEOCODING =====================
 let calcTimeout=null;
-let addrSuggestTimeout=null;
+let userCountryCode = null; // detected from GPS
+
+// Detect user's country from GPS coordinates
+function detectUserCountry(lat, lon) {
+  if (userCountryCode) return;
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=5&addressdetails=1`)
+    .then(r=>r.json())
+    .then(d=>{
+      if(d&&d.address&&d.address.country_code) {
+        userCountryCode = d.address.country_code.toUpperCase();
+        console.log('User country detected:', userCountryCode);
+      }
+    }).catch(()=>{});
+}
+
+function shortAddress(displayName) {
+  // Extract just street + city from full Nominatim display name
+  const parts = displayName.split(',').map(s=>s.trim());
+  if (parts.length >= 3) {
+    // Return "Street, City, State" — first 3 meaningful parts
+    return parts.slice(0,3).join(', ');
+  }
+  return parts.slice(0,2).join(', ') || displayName;
+}
 
 function setupDistanceCalc(){
   const fromEl=document.getElementById('man-from');
   const toEl=document.getElementById('man-to');
   
-  // Distance calc on input
   const handler=()=>{
     clearTimeout(calcTimeout);
     calcTimeout=setTimeout(()=>calcDistanceBetween(fromEl.value,toEl.value),1000);
@@ -1681,18 +1703,16 @@ function setupDistanceCalc(){
   fromEl.addEventListener('input',handler);
   toEl.addEventListener('input',handler);
 
-  // Address autocomplete suggestions
   setupAddressSuggestions(fromEl,'from-suggestions');
   setupAddressSuggestions(toEl,'to-suggestions');
 }
 
 function setupAddressSuggestions(inputEl, listId) {
-  // Create suggestion dropdown
   const wrapper = inputEl.parentElement;
   wrapper.style.position='relative';
   const list = document.createElement('div');
   list.id = listId;
-  list.style.cssText='position:absolute;top:100%;left:0;right:0;background:#1e1e3a;border:1px solid rgba(255,255,255,0.12);border-radius:12px;z-index:1000;max-height:200px;overflow-y:auto;display:none;margin-top:4px;box-shadow:0 8px 32px rgba(0,0,0,0.5);';
+  list.style.cssText='position:absolute;top:100%;left:0;right:0;background:#1e1e3a;border:1px solid rgba(255,255,255,0.12);border-radius:12px;z-index:1000;max-height:220px;overflow-y:auto;display:none;margin-top:4px;box-shadow:0 8px 32px rgba(0,0,0,0.6);';
   wrapper.appendChild(list);
 
   let suggestTimer=null;
@@ -1703,39 +1723,51 @@ function setupAddressSuggestions(inputEl, listId) {
     suggestTimer=setTimeout(()=>fetchSuggestions(val,list,inputEl),400);
   });
   inputEl.addEventListener('blur',()=>setTimeout(()=>list.style.display='none',200));
-  inputEl.addEventListener('focus',()=>{if(inputEl.value.length>=3)list.style.display=list.children.length?'block':'none';});
 }
 
 async function fetchSuggestions(query, listEl, inputEl) {
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,{headers:{'Accept-Language':'en'}});
+    // Build URL with country filter if we know user's country
+    let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+    if (userCountryCode) url += `&countrycodes=${userCountryCode.toLowerCase()}`;
+    
+    const res = await fetch(url, {headers:{'Accept-Language':'en'}});
     const data = await res.json();
-    if(!data.length){listEl.style.display='none';return;}
+    
+    if(!data.length){
+      listEl.innerHTML='<div style="padding:14px;color:rgba(255,255,255,0.4);font-size:13px;text-align:center">No results found</div>';
+      listEl.style.display='block';
+      return;
+    }
+    
     listEl.innerHTML = data.map(d=>{
-      const name = d.display_name;
-      const short = name.length>60?name.substring(0,60)+'...':name;
-      return `<div style="padding:12px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;color:rgba(255,255,255,0.9);transition:background 0.2s;" 
+      const short = shortAddress(d.display_name);
+      const full = d.display_name;
+      return `<div style="padding:13px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);transition:background 0.15s;" 
         onmousedown="event.preventDefault()"
-        onclick="selectSuggestion('${name.replace(/'/g,"\\'")}','${inputEl.id}')" 
-        onmouseover="this.style.background='rgba(79,142,247,0.15)'" 
-        onmouseout="this.style.background=''">${short}</div>`;
+        onclick="selectSuggestion('${short.replace(/'/g,"\\'")}','${full.replace(/'/g,"\\'")}','${inputEl.id}')" 
+        onmouseover="this.style.background='rgba(79,142,247,0.18)'" 
+        onmouseout="this.style.background=''">
+        <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.95)">📍 ${short}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${full}</div>
+      </div>`;
     }).join('');
     listEl.style.display='block';
   } catch(e){listEl.style.display='none';}
 }
 
-function selectSuggestion(addr, inputId) {
+function selectSuggestion(shortAddr, fullAddr, inputId) {
   const el=document.getElementById(inputId);
   if(el){
-    el.value=addr;
+    el.value=shortAddr;
+    el.dataset.fullAddr=fullAddr; // store full for geocoding
     const listId=inputId==='man-from'?'from-suggestions':'to-suggestions';
     const list=document.getElementById(listId);
     if(list)list.style.display='none';
-    // Trigger distance calc
     clearTimeout(calcTimeout);
     calcTimeout=setTimeout(()=>calcDistanceBetween(
-      document.getElementById('man-from').value,
-      document.getElementById('man-to').value
+      document.getElementById('man-from').dataset.fullAddr || document.getElementById('man-from').value,
+      document.getElementById('man-to').dataset.fullAddr || document.getElementById('man-to').value
     ),300);
   }
 }
@@ -1746,7 +1778,6 @@ function calcDistanceBetween(from,to){
   document.getElementById('man-calc-text').textContent='📍 Calculating distance...';
   Promise.all([geocodeAddress(from),geocodeAddress(to)]).then(([fc,tc])=>{
     if(fc&&tc){
-      // Use straight-line * 1.25 factor for road estimate
       const straightLine=haversine(fc.lat,fc.lon,tc.lat,tc.lon);
       const roadEst=Math.round(straightLine*1.25*10)/10;
       document.getElementById('man-calc-text').textContent=`~${roadEst} miles (estimated road distance)`;
@@ -1760,7 +1791,9 @@ function calcDistanceBetween(from,to){
 }
 
 function geocodeAddress(addr){
-  return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1&addressdetails=1`,{headers:{'Accept-Language':'en'}})
+  let url=`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1&addressdetails=1`;
+  if(userCountryCode) url+=`&countrycodes=${userCountryCode.toLowerCase()}`;
+  return fetch(url,{headers:{'Accept-Language':'en'}})
     .then(r=>r.json())
     .then(d=>d&&d.length?{lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon),name:d[0].display_name}:null)
     .catch(()=>null);
@@ -1823,27 +1856,37 @@ function renderTrips(){
       const bizSel=t.category==='business'?' sel-biz':'';const persSel=t.category==='personal'?' sel-pers':'';
       const catLabel=t.category==='business'?'Business':t.category==='personal'?'Personal':'Classify';
       const catColorSolid=t.category==='business'?'#00D4AA':t.category==='personal'?'#FF6B9D':'#FFB74D';
-      const catColorAlpha=t.category==='business'?'rgba(0,212,170,':'rgba(255,107,157,';
-      const seed=(t.id?parseInt(t.id)%100:50)/100;const curveY=30+seed*40;
-      const miniMapHtml=`<div class="trip-mini-map" style="background:linear-gradient(135deg,${catColorAlpha}0.06) 0%,rgba(10,10,26,0.95) 100%)">
-        <svg width="100%" height="100%" viewBox="0 0 400 100" preserveAspectRatio="none" style="position:absolute;inset:0">
-          <defs><linearGradient id="rg${t.id}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#00E676;stop-opacity:0.6"/><stop offset="100%" style="stop-color:${catColorSolid};stop-opacity:0.6"/></linearGradient></defs>
-          <path d="M 30 70 Q 120 ${curveY} 200 50 Q 280 ${100-curveY} 370 30" fill="none" stroke="url(#rg${t.id})" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.7"/>
-          <circle cx="30" cy="70" r="5" fill="#00E676" opacity="0.9"/>
-          <circle cx="370" cy="30" r="5" fill="#FF5252" opacity="0.9"/>
-        </svg>
-        <div style="position:absolute;bottom:8px;left:12px;font-size:10px;color:var(--text3);font-weight:500">${t.miles.toFixed(1)} miles</div>
-        <div class="map-category-badge ${t.category}">${catLabel}</div>
+      const catBg=t.category==='business'?'rgba(0,212,170,0.08)':t.category==='personal'?'rgba(255,107,157,0.08)':'rgba(255,183,77,0.08)';
+      // Shorten addresses for display
+      function shortAddr(a){if(!a||a==='Start'||a==='Destination')return a;const p=a.split(',');return p[0].trim()+(p[1]?', '+p[1].trim():'');}
+      const fromShort=shortAddr(fromAddr);const toShort=shortAddr(toAddr);
+      const miniMapHtml=`<div style="background:${catBg};border-bottom:1px solid rgba(255,255,255,0.06);padding:14px 16px 12px;position:relative">
+        <div class="map-category-badge ${t.category}" style="position:absolute;top:10px;right:12px">${catLabel}</div>
+        <div style="display:flex;align-items:stretch;gap:10px">
+          <div style="display:flex;flex-direction:column;align-items:center;padding-top:2px;flex-shrink:0">
+            <div style="width:12px;height:12px;border-radius:50%;background:#00E676;border:2px solid rgba(255,255,255,0.3);flex-shrink:0"></div>
+            <div style="flex:1;width:2px;background:linear-gradient(180deg,#00E676,${catColorSolid});margin:4px 0;min-height:24px;border-radius:1px"></div>
+            <div style="width:12px;height:12px;border-radius:50%;background:${catColorSolid};border:2px solid rgba(255,255,255,0.3);flex-shrink:0"></div>
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:10px">
+            <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px 10px;border:1px solid rgba(255,255,255,0.06)">
+              <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">FROM</div>
+              <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(fromShort)}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:8px 10px;border:1px solid rgba(255,255,255,0.06)">
+              <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">TO</div>
+              <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(toShort)}</div>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding-right:4px">
+            <div style="font-size:28px;font-weight:800;color:${catColorSolid};line-height:1">${t.miles.toFixed(1)}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:500">miles</div>
+            ${dur>0?`<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px">${dur}min</div>`:''}
+          </div>
+        </div>
       </div>`;
       html+=`<div class="trip-card" onclick="editTrip('${t.id}')">
         ${miniMapHtml}
-        <div class="trip-route-section">
-          <div class="trip-route-row">
-            <div class="trip-route-dots"><div class="route-dot start"></div><div class="route-line"></div><div class="route-dot end"></div></div>
-            <div class="trip-route-addrs"><div class="trip-addr from">${esc(fromAddr)}</div><div class="trip-addr to">${esc(toAddr)}</div></div>
-            <div class="trip-miles-badge"><div class="mi-val">${t.miles.toFixed(1)}</div><div class="mi-unit">miles</div></div>
-          </div>
-        </div>
         <div class="trip-meta-row">
           <div class="trip-meta-left">
             <span>${timeStr}</span><span>${dur}min</span>
@@ -2104,7 +2147,7 @@ function updateDriveUI(state){
 }
 function handlePosition(pos){
   const{latitude,longitude,speed,accuracy}=pos.coords;const now=Date.now();positionCount++;
-  if(!gpsReady){gpsReady=true;document.getElementById('gps-activate').style.display='none';debugLog('GPS READY');updateDriveUI('monitoring');}
+  if(!gpsReady){gpsReady=true;document.getElementById('gps-activate').style.display='none';debugLog('GPS READY');updateDriveUI('monitoring');detectUserCountry(latitude,longitude);}
   let gpsSpeed=(speed!==null&&speed>=0)?speed*2.237:0;let calcSpeed=0;
   if(lastMonitorPos&&lastMonitorTime&&(now-lastMonitorTime)>500){calcSpeed=calcSpeedBetween(lastMonitorPos.lat,lastMonitorPos.lng,lastMonitorTime,latitude,longitude,now);if(calcSpeed>200)calcSpeed=0;}
   const mph=Math.max(gpsSpeed,calcSpeed);
