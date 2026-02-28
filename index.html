@@ -1667,20 +1667,26 @@ function autoClassifyTrip(trip){return getAddrCategory(trip.endName)||getAddrCat
 
 // ===================== DISTANCE & GEOCODING =====================
 let calcTimeout=null;
-let userCountryCode = null; // detected from GPS
+let userCountryCode = null;
 
-// Detect user's country from GPS coordinates
-function detectUserCountry(lat, lon) {
-  if (userCountryCode) return;
-  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=5&addressdetails=1`)
-    .then(r=>r.json())
-    .then(d=>{
-      if(d&&d.address&&d.address.country_code) {
-        userCountryCode = d.address.country_code.toUpperCase();
-        console.log('User country detected:', userCountryCode);
-      }
-    }).catch(()=>{});
-}
+// Detect country immediately from IP on page load
+(async function detectCountryFromIP() {
+  try {
+    const res = await fetch('https://ipapi.co/json/');
+    const data = await res.json();
+    if (data && data.country_code) {
+      userCountryCode = data.country_code.toUpperCase();
+      console.log('Country from IP:', userCountryCode);
+    }
+  } catch(e) {
+    try {
+      // Fallback
+      const res2 = await fetch('https://api.country.is/');
+      const data2 = await res2.json();
+      if (data2 && data2.country) userCountryCode = data2.country.toUpperCase();
+    } catch(e2) {}
+  }
+})();
 
 function shortAddress(displayName) {
   // Extract just street + city from full Nominatim display name
@@ -2147,7 +2153,7 @@ function updateDriveUI(state){
 }
 function handlePosition(pos){
   const{latitude,longitude,speed,accuracy}=pos.coords;const now=Date.now();positionCount++;
-  if(!gpsReady){gpsReady=true;document.getElementById('gps-activate').style.display='none';debugLog('GPS READY');updateDriveUI('monitoring');detectUserCountry(latitude,longitude);}
+  if(!gpsReady){gpsReady=true;document.getElementById('gps-activate').style.display='none';debugLog('GPS READY');updateDriveUI('monitoring');}
   let gpsSpeed=(speed!==null&&speed>=0)?speed*2.237:0;let calcSpeed=0;
   if(lastMonitorPos&&lastMonitorTime&&(now-lastMonitorTime)>500){calcSpeed=calcSpeedBetween(lastMonitorPos.lat,lastMonitorPos.lng,lastMonitorTime,latitude,longitude,now);if(calcSpeed>200)calcSpeed=0;}
   const mph=Math.max(gpsSpeed,calcSpeed);
